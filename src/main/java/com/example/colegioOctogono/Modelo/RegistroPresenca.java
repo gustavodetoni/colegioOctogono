@@ -1,4 +1,4 @@
-package Modelo;
+package com.example.colegioOctogono.Modelo;
 
 import jakarta.persistence.*;
 import lombok.*;

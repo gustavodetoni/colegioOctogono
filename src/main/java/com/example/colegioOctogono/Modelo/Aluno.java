@@ -1,4 +1,4 @@
-package Modelo;
+package com.example.colegioOctogono.Modelo;
 
 import java.util.Set;
 import jakarta.persistence.*;

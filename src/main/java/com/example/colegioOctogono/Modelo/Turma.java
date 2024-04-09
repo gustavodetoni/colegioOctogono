@@ -1,18 +1,18 @@
-package Modelo;
+package com.example.colegioOctogono.Modelo;
 
 import jakarta.persistence.*;
 import lombok.*;
 
 import java.util.Set;
 
-@Table(name = "turma")
-@Entity(name = "turma")
+
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @EqualsAndHashCode(of = "id")
-
+@Table(name = "turma")
+@Entity(name = "turma")
 public class Turma {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -25,5 +25,7 @@ public class Turma {
             inverseJoinColumns = @JoinColumn(name = "aluno_id"))
     private Set<Aluno> alunos;
 
-
+    @ManyToOne
+    @JoinColumn(name = "materia_id")
+    private Materia materia;
 }

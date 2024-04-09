@@ -1,17 +1,17 @@
-package Modelo;
+package com.example.colegioOctogono.Modelo;
 
+import java.util.HashSet;
 import java.util.Set;
 import jakarta.persistence.*;
 import lombok.*;
 
-@Table(name = "materias")
-@Entity(name = "materias")
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @EqualsAndHashCode(of = "id")
-
+@Table(name = "materias")
+@Entity(name = "materias")
 public class Materia {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -21,8 +21,8 @@ public class Materia {
     @ManyToMany(mappedBy = "materias")
     private Set<Professor> professores;
 
-    @ManyToMany(mappedBy = "materias")
-    private Set<Turma> turmas;
+    @OneToMany(mappedBy = "materia", cascade = CascadeType.ALL)
+    private Set<Turma> turmas = new HashSet<>();
 
     public Set<Turma> getTurmas() {
         return turmas;
