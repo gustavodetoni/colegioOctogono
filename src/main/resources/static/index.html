@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema de Presença</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+        }
+        label {
+            display: block;
+            margin-top: 10px;
+        }
+        select {
+            width: 100%;
+            padding: 10px;
+            margin-top: 5px;
+        }
+        button {
+            padding: 10px 20px;
+            margin-top: 20px;
+            background-color: #007BFF;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        table, th, td {
+            border: 1px solid black;
+        }
+        th, td {
+            padding: 10px;
+            text-align: left;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+    </style>
+</head>
+<body>
+
+<h2>Sistema de Presença</h2>
+<label for="materia">Selecione a Matéria:</label>
+<select id="materia" onchange="carregarTurmas()">
+</select>
+<label for="turma">Selecione a Turma:</label>
+<select id="turma" onchange="carregarAlunos()">
+</select>
+<button onclick="buscarAlunos()">Buscar Alunos</button>
+<h3>Alunos da Turma</h3>
+<table id="alunosTable">
+    <thead>
+    <tr>
+        <th>Nome do Aluno</th>
+    </tr>
+    </thead>
+    <tbody>
+    </tbody>
+</table>
+
+<script>
+    window.onload = function() {
+        carregarMaterias();
+    };
+
+    function carregarMaterias() {
+    const professorId = 1;
+    fetch(`/professor/${professorId}/materias`)
+    .then(response => {
+        if (!response.ok) {
+            throw new Error(`Erro ao carregar matérias: ${response.statusText}`);
+        }
+        return response.json();
+    })
+    .then(data => {
+        console.log('Dados recebidos:', data);
+        const materiaSelect = document.getElementById('materia');
+        materiaSelect.innerHTML = '';
+
+        const defaultOption = document.createElement('option');
+        defaultOption.value = "";
+        defaultOption.textContent = "Selecione...";
+        materiaSelect.appendChild(defaultOption);
+
+        data.forEach(nomeMateria => {
+            const option = document.createElement('option');
+            option.value = nomeMateria;
+            option.textContent = nomeMateria;
+            materiaSelect.appendChild(option);
+        });
+    })
+    .catch(error => {
+        console.error('Erro ao carregar matérias:', error);
+    });
+}
+
+
+    function carregarTurmas() {
+    fetch(`/professor/turmas`)
+    .then(response => {
+        if (!response.ok) {
+            throw new Error(`Erro ao carregar turmas: ${response.statusText}`);
+        }
+        return response.json();
+    })
+    .then(data => {
+        console.log('Dados recebidos:', data);
+        const turmaSelect = document.getElementById('turma');
+        turmaSelect.innerHTML = '';
+
+        const defaultOption = document.createElement('option');
+        defaultOption.value = "";
+        defaultOption.textContent = "Selecione...";
+        turmaSelect.appendChild(defaultOption);
+
+        data.forEach(nomeTurma => {
+            const option = document.createElement('option');
+            option.value = nomeTurma;
+            option.textContent = nomeTurma;
+            turmaSelect.appendChild(option);
+        });
+    })
+    .catch(error => {
+        console.error('Erro ao carregar turmas:', error);
+    });
+}
+
+
+    function buscarAlunos() {
+    fetch(`/professor/alunos`)
+    .then(response => {
+        if (!response.ok) {
+            throw new Error(`Erro ao buscar alunos: ${response.statusText}`);
+        }
+        return response.json();
+    })
+    .then(data => {
+        console.log('Dados dos alunos:', data);
+
+        const alunosTable = document.getElementById('alunosTable').getElementsByTagName('tbody')[0];
+        alunosTable.innerHTML = '';
+
+        if (data.length === 0) {
+            const row = alunosTable.insertRow();
+            const cell = row.insertCell(0);
+            cell.textContent = 'Nenhum aluno encontrado';
+            cell.colSpan = 4;
+            return;
+        }
+
+        data.forEach(nomeAluno => {
+            const row = alunosTable.insertRow();
+
+            const cellNome = row.insertCell(0);
+            cellNome.textContent = nomeAluno;
+        });
+    })
+    .catch(error => {
+        console.error('Erro ao buscar alunos:', error);
+    });
+}
+
+</script>
+
+</body>
+</html>

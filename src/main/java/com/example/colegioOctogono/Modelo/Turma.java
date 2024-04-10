@@ -25,7 +25,7 @@ public class Turma {
             inverseJoinColumns = @JoinColumn(name = "aluno_id"))
     private Set<Aluno> alunos;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "materia_id")
     private Materia materia;
 }

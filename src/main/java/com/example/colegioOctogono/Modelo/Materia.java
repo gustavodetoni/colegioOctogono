@@ -2,6 +2,8 @@ package com.example.colegioOctogono.Modelo;
 
 import java.util.HashSet;
 import java.util.Set;
+
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -18,11 +20,12 @@ public class Materia {
     private Long id;
     private String nome;
 
+    @JsonManagedReference
     @ManyToMany(mappedBy = "materias")
     private Set<Professor> professores;
 
-    @OneToMany(mappedBy = "materia", cascade = CascadeType.ALL)
-    private Set<Turma> turmas = new HashSet<>();
+    @OneToMany(mappedBy = "materia")
+    private Set<Turma> turmas;
 
     public Set<Turma> getTurmas() {
         return turmas;

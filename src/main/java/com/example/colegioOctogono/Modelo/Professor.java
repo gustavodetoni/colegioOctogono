@@ -1,6 +1,8 @@
 package com.example.colegioOctogono.Modelo;
 
 import java.util.Set;
+
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -18,6 +20,7 @@ public class Professor {
     private String nome;
     private String  email;
 
+    @JsonManagedReference
     @ManyToMany
     @JoinTable(name = "professor_materia",
             joinColumns = @JoinColumn(name = "professor_id"),
