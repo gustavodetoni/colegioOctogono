@@ -24,7 +24,7 @@ public class Materia {
     @ManyToMany(mappedBy = "materias")
     private Set<Professor> professores;
 
-    @OneToMany(mappedBy = "materia")
+    @OneToMany(mappedBy = "materias")
     private Set<Turma> turmas;
 
     public Set<Turma> getTurmas() {
@@ -34,4 +34,8 @@ public class Materia {
     public void setTurmas(Set<Turma> turmas) {
         this.turmas = turmas;
     }
+
+    @ManyToOne
+    @JoinColumn(name = "id_aluno")
+    private Aluno aluno;
 }

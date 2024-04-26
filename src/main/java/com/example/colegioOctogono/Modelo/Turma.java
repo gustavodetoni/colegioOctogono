@@ -25,7 +25,12 @@ public class Turma {
             inverseJoinColumns = @JoinColumn(name = "aluno_id"))
     private Set<Aluno> alunos;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "materia_id")
-    private Materia materia;
+    @ManyToMany
+    @JoinTable(
+            name = "materia_turma",
+            joinColumns = @JoinColumn(name = "turma_id"),
+            inverseJoinColumns = @JoinColumn(name = "materia_id")
+    )
+    private Set<Materia> materias;
+
 }
