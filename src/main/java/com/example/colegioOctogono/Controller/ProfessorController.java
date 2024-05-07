@@ -7,15 +7,15 @@ import com.example.colegioOctogono.Repositorio.RegistroPresencaRepository;
 import com.example.colegioOctogono.Repositorio.TurmaRepository;
 import com.example.colegioOctogono.Repositorio.AlunoRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
+@CrossOrigin(origins = "http://127.0.0.1:5173")
 @RestController
 @RequestMapping(value = "/sistema")
 public class ProfessorController {
@@ -56,30 +56,29 @@ public class ProfessorController {
     }
 
     // Ver todas as turmas
+
     @GetMapping(value = "/turmas")
-    public ResponseEntity<List<String>> getAllTurmaNames() {
+    public ResponseEntity<List<Turma>> getAllTurmaNames() {
         List<Turma> turmas = turmaRepository.findAll();
         if (!turmas.isEmpty()) {
-            List<String> nomesTurmas = turmas.stream()
-                    .map(Turma::getNome)
-                    .collect(Collectors.toList());
-            return ResponseEntity.ok(nomesTurmas);
+            return ResponseEntity.ok(turmas);
         } else {
             return ResponseEntity.noContent().build();
         }
     }
 
-    //Ver as matérias associadas a um professor
-    @GetMapping(value = "/{professorId}/materias")
-    public ResponseEntity<Set<String>> getMateriasByProfessor(@PathVariable Long professorId) {
-        Optional<Professor> professorOptional = professorRepository.findById(professorId);
-        if (professorOptional.isPresent()) {
-            Set<Materia> materias = professorOptional.get().getMaterias();
-            Set<String> nomesMaterias = materias.stream()
-                    .map(Materia::getNome)
-                    .collect(Collectors.toSet());
+    // Ver materias associadas a uma turma
+    @GetMapping(value = "/{turmaId}/materias")
+    public ResponseEntity<Set<Materia>> getMateriasByTurma(@PathVariable Long turmaId) {
+        Optional<Turma> turmaOptional = turmaRepository.findById(turmaId);
 
-            return ResponseEntity.ok(nomesMaterias);
+        if (turmaOptional.isPresent()) {
+            Set<Materia> materias = turmaOptional.get().getMaterias();
+            if (!materias.isEmpty()) {
+                return ResponseEntity.ok(materias);
+            } else {
+                return ResponseEntity.noContent().build();
+            }
         } else {
             return ResponseEntity.notFound().build();
         }
@@ -106,15 +105,10 @@ public class ProfessorController {
         }
     }
 
-    //Ver os alunos associados a uma turma
-    @GetMapping(value = "/{professorId}/materia/{materiaId}/turma/{turmaId}/alunos")
-    public ResponseEntity<List<String>> getAlunosByMateriaETurma(@PathVariable Long professorId, @PathVariable Long materiaId, @PathVariable Long turmaId) {
-        Optional<Professor> professorOptional = professorRepository.findById(professorId);
-        if (!professorOptional.isPresent()) {
-            return ResponseEntity.notFound().build();
-        }
-        List<Aluno> todosAlunos = alunoRepository.findAll();
-        List<Aluno> alunosFiltrados = todosAlunos.stream()
+    //Ver os alunos associados a uma turma e materia
+    @GetMapping(value = "/turma/{turmaId}/materia/{materiaId}/alunos")
+    public ResponseEntity<List<Aluno>> getAlunosByTurmaEMateria(@PathVariable Long turmaId, @PathVariable Long materiaId) {
+        List<Aluno> alunosFiltrados = alunoRepository.findAll().stream()
                 .filter(aluno -> {
                     boolean alunoNaTurma = aluno.getTurmas().stream().anyMatch(turma -> turma.getId().equals(turmaId));
                     boolean alunoNaMateria = aluno.getMaterias().stream().anyMatch(materia -> materia.getId().equals(materiaId));
@@ -124,10 +118,7 @@ public class ProfessorController {
         if (alunosFiltrados.isEmpty()) {
             return ResponseEntity.noContent().build();
         } else {
-            List<String> nomesAlunos = alunosFiltrados.stream()
-                    .map(Aluno::getNome)
-                    .collect(Collectors.toList());
-            return ResponseEntity.ok(nomesAlunos);
+            return ResponseEntity.ok(alunosFiltrados);
         }
     }
 
@@ -166,6 +157,47 @@ public class ProfessorController {
         });
         return ResponseEntity.ok().build();
     }
+
+    // Ver relatorio
+    @GetMapping(value = "/relatorio-faltas/alunos/materia/{materiaId}")
+    public ResponseEntity<?> getRelatorioFaltas(@RequestParam List<Long> alunoIds, @PathVariable Long materiaId) {
+        Optional<Materia> materiaOptional = materiaRepository.findById(materiaId);
+
+        if (!materiaOptional.isPresent()) {
+            return ResponseEntity.notFound().build();
+        }
+
+        Materia materia = materiaOptional.get();
+        List<Map<String, Object>> relatorios = new ArrayList<>();
+
+        for (Long alunoId : alunoIds) {
+            Optional<Aluno> alunoOptional = alunoRepository.findById(alunoId);
+            if (alunoOptional.isPresent()) {
+                Aluno aluno = alunoOptional.get();
+
+                // Conta o número de faltas do aluno na matéria
+                long numeroDeFaltas = registroPresencaRepository.findAll().stream()
+                        .filter(registro -> registro.getAluno().equals(aluno) && registro.getMateria().equals(materia) && !registro.isPresente())
+                        .count();
+
+                // Cria um relatório para o aluno
+                Map<String, Object> relatorio = new HashMap<>();
+                relatorio.put("nomeAluno", aluno.getNome());
+                relatorio.put("nomeMateria", materia.getNome());
+                relatorio.put("faltas", numeroDeFaltas);
+
+                relatorios.add(relatorio);
+            }
+        }
+
+        if (relatorios.isEmpty()) {
+            return ResponseEntity.noContent().build();
+        } else {
+            return ResponseEntity.ok(relatorios);
+        }
+    }
+
+
 
 }
 
