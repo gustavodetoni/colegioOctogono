@@ -15,7 +15,7 @@ import java.time.LocalDate;
 import java.util.*;
 import java.util.stream.Collectors;
 
-@CrossOrigin(origins = "http://127.0.0.1:5173")
+@CrossOrigin(origins = "*")
 @RestController
 @RequestMapping(value = "/sistema")
 public class ProfessorController {
